@@ -23,9 +23,9 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: your-app-name    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '20.x'                # set this to the node version to use
+  AZURE_WEBAPP_NAME: your-app-name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  NODE_VERSION: '20.x'
 
 permissions:
   contents: read
@@ -40,7 +40,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
 
     - name: npm install, build, and test
       run: |
@@ -62,7 +61,6 @@ jobs:
     environment:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
     steps:
     - name: Download artifact from build job
       uses: actions/download-artifact@v4
