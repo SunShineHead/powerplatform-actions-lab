@@ -1,6 +1,4 @@
 name: export-and-branch-solution
-# Export solution from DEV environment
-#  unpack it and prepare, commit and push a git branch with the changes
 on:
   workflow_dispatch:
   push:
@@ -15,7 +13,7 @@ jobs:
     env:
       RUNNER_DEBUG: 1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         lfs: true
     - name: who-am-i action
