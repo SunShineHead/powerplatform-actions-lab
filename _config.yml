@@ -1,0 +1,17 @@
+title: PowerPlatform Actions Lab
+description: Sample workflows and solutions for automating Power Platform ALM with GitHub Actions.
+theme: jekyll-theme-minimal
+
+readme_index:
+  enabled: true
+  remove_originals: false
+
+exclude:
+  - PowerActionsLab.zip
+  - sample-workflows/
+  - solutions/
+  - .devcontainer/
+  - .vscode/
+  - .editorconfig
+  - .gitattributes
+  - .gitignore
