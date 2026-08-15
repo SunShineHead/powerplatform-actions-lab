@@ -1,7 +1,7 @@
 name: release-solution-to-prod
-# prepare for releasing to prod:
-#   convert solution to managed (using a build PowerPlatform environment for the conversion)
-#   upload the solution to the GitHub artifacts and deploy to the PROD environment
+# Prepare a managed Power Platform solution for production deployment.
+# Authentication remains secret-based here; migrate to workload identity/OIDC
+# after the target Power Platform authentication configuration is verified.
 
 on:
   workflow_dispatch:
@@ -9,74 +9,71 @@ on:
     types: [created]
 
 permissions:
-  contents: write
+  contents: read
+
 jobs:
   convert-to-managed:
     runs-on: windows-latest
-    env:
-      RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
 
-    - name: Pack solution
-      uses: microsoft/powerplatform-actions/pack-solution@v0
-      with:
-        solution-folder: solutions/ALMLab
-        solution-file: out/solutions/ALMLab.zip
-        solution-type: Unmanaged
+      - name: Pack solution
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-folder: solutions/ALMLab
+          solution-file: out/solutions/ALMLab.zip
+          solution-type: Unmanaged
 
-    - name: Import solution as unmanaged to build env
-      uses: microsoft/powerplatform-actions/import-solution@v0
-      with:
-        environment-url: 'https://user9-build.crm.dynamics.com/'
-        user-name: 'user9@wrkdevops.onmicrosoft.com'
-        password-secret: ${{ secrets.password }}
-        solution-file: out/solutions/ALMLab.zip
-        force-overwrite: true
-        publish-changes: true
+      - name: Import solution as unmanaged to build env
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: 'https://user9-build.crm.dynamics.com/'
+          user-name: 'user9@wrkdevops.onmicrosoft.com'
+          password-secret: ${{ secrets.password }}
+          solution-file: out/solutions/ALMLab.zip
+          force-overwrite: true
+          publish-changes: true
 
-    - name: Export solution as managed
-      uses: microsoft/powerplatform-actions/export-solution@v0
-      with:
-        environment-url: 'https://user9-build.crm.dynamics.com/'
-        user-name: 'user9@wrkdevops.onmicrosoft.com'
-        password-secret: ${{ secrets.password }}
-        solution-name: ALMLab
-        managed: true
-        solution-output-file: out/ship/ALMLab.zip
+      - name: Export solution as managed
+        uses: microsoft/powerplatform-actions/export-solution@v1
+        with:
+          environment-url: 'https://user9-build.crm.dynamics.com/'
+          user-name: 'user9@wrkdevops.onmicrosoft.com'
+          password-secret: ${{ secrets.password }}
+          solution-name: ALMLab
+          managed: true
+          solution-output-file: out/ship/ALMLab.zip
 
-    - name: Upload the ready to ship solution to GH artifact store
-      uses: actions/upload-artifact@v2
-      with:
-        name: managedSolutions
-        path: out/ship/ALMLab.zip
+      - name: Upload managed solution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: managedSolutions
+          path: out/ship/ALMLab.zip
+          if-no-files-found: error
 
-  release-to-staging:
-    needs: [ convert-to-managed ]
+  release-to-prod:
+    needs: [convert-to-managed]
     runs-on: windows-latest
-    env:
-      RUNNER_DEBUG: 1
+    environment:
+      name: production
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
+      - name: Download managed solution artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: managedSolutions
+          path: out/release/
 
-    - name: Fetch the ready to ship solution from GH artifact store
-      uses: actions/download-artifact@v2
-      with:
-        name: managedSolutions
-        path: out/release/
-
-    - name: Import solution to prod env
-      uses: microsoft/powerplatform-actions/import-solution@v0
-      with:
-        environment-url: 'https://user9-prod.crm.dynamics.com/'
-        user-name: 'user9@wrkdevops.onmicrosoft.com'
-        password-secret: ${{ secrets.password }}
-        solution-file: out/release/ALMLab.zip
-        force-overwrite: true
-        publish-changes: true
+      - name: Import solution to production
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: 'https://user9-prod.crm.dynamics.com/'
+          user-name: 'user9@wrkdevops.onmicrosoft.com'
+          password-secret: ${{ secrets.password }}
+          solution-file: out/release/ALMLab.zip
+          force-overwrite: true
+          publish-changes: true
