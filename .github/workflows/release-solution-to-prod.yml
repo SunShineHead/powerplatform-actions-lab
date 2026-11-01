@@ -49,7 +49,7 @@ jobs:
         solution-output-file: out/ship/ALMLab.zip
 
     - name: Upload the ready to ship solution to GH artifact store
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v7
       with:
         name: managedSolutions
         path: out/ship/ALMLab.zip
