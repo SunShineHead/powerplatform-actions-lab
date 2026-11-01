@@ -17,19 +17,19 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
       with:
         lfs: true
 
     - name: Pack solution
-      uses: microsoft/powerplatform-actions/pack-solution@v0
+      uses: microsoft/powerplatform-actions/pack-solution@v1
       with:
         solution-folder: solutions/ALMLab
         solution-file: out/solutions/ALMLab.zip
         solution-type: Unmanaged
 
     - name: Import solution as unmanaged to build env
-      uses: microsoft/powerplatform-actions/import-solution@v0
+      uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: 'https://user9-build.crm.dynamics.com/'
         user-name: 'user9@wrkdevops.onmicrosoft.com'
@@ -39,7 +39,7 @@ jobs:
         publish-changes: true
 
     - name: Export solution as managed
-      uses: microsoft/powerplatform-actions/export-solution@v0
+      uses: microsoft/powerplatform-actions/export-solution@v1
       with:
         environment-url: 'https://user9-build.crm.dynamics.com/'
         user-name: 'user9@wrkdevops.onmicrosoft.com'
@@ -49,7 +49,7 @@ jobs:
         solution-output-file: out/ship/ALMLab.zip
 
     - name: Upload the ready to ship solution to GH artifact store
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v7
       with:
         name: managedSolutions
         path: out/ship/ALMLab.zip
@@ -61,7 +61,7 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
       with:
         lfs: true
 
@@ -72,7 +72,7 @@ jobs:
         path: out/release/
 
     - name: Import solution to prod env
-      uses: microsoft/powerplatform-actions/import-solution@v0
+      uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: 'https://user9-prod.crm.dynamics.com/'
         user-name: 'user9@wrkdevops.onmicrosoft.com'
